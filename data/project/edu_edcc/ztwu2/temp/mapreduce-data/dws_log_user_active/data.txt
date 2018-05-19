@@ -1,0 +1,5 @@
+{userId:"u001",event:"1001"}
+{userId:"u001",event:"1002"}
+{userId:"u003",event:"3001"}
+{userId:"u003",event:"3002"}
+{userId:"u003",event:"3003"}
