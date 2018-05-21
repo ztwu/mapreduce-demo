@@ -26,10 +26,10 @@ public class MyRecordWriter<K,V> extends RecordWriter<K, V> {
         System.out.println("key:"+key.toString());
         System.out.println("value:"+value.toString().trim());
 
-//        fsDataOutputStream.writeUTF(value.toString().trim()+"\n");
+        fsDataOutputStream.writeUTF(value.toString().trim()+"\n");
 
         //输出为txt文件
-        fsDataOutputStream.writeChars(value.toString()+"\n");
+//        fsDataOutputStream.writeChars(value.toString()+"\n");
 
     }
 

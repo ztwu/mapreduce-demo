@@ -3,7 +3,9 @@ package com.iflytek.edu.main;
 import com.iflytek.edu.bean.DwsUcUserOrganizationBean;
 import com.iflytek.edu.mapper.DwsLogUserActiveMapper;
 import com.iflytek.edu.mapper.DwsUcUserOrganizationMapper;
+import com.iflytek.edu.mapper.GroupCountMapper;
 import com.iflytek.edu.mapper.SchoolOrgMapper;
+import com.iflytek.edu.reducer.GroupCountReducer;
 import com.iflytek.edu.reducer.ZhktUserBaseReducer;
 import com.iflytek.edu.reducer.ZhktUserInfoReducer;
 import com.iflytek.edu.utils.*;
@@ -11,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -19,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.parquet.avro.AvroParquetInputFormat;
 import org.apache.parquet.example.data.Group;
@@ -53,6 +57,7 @@ public class ZhktUserBaseRunner {
         String inputpath3 = "data/project/edu_edcc/ztwu2/temp/mapreduce-data/dw_school_org";
 
         String midtemppath1 = "data/project/edu_edcc/ztwu2/temp/mapreduce-mid-temp/temp1";
+        String midtemppath2 = "data/project/edu_edcc/ztwu2/temp/mapreduce-mid-temp/temp2";
 
         String outputpath = "data/project/edu_edcc/ztwu2/temp/mapreduce-result";
 
@@ -61,7 +66,7 @@ public class ZhktUserBaseRunner {
         //获得Configuration配置 Configuration: core-default.xml, core-site.xml
         Configuration conf = new Configuration();
 
-        Util.cleanInputpath(conf, midtemppath1, outputpath);
+        Util.cleanInputpath(conf, midtemppath1, midtemppath2, outputpath);
 
         String writeSchema = "message example {\n" +
                 "required binary province_id;\n" +
@@ -166,6 +171,7 @@ public class ZhktUserBaseRunner {
         job2.setNumReduceTasks(2);
 
         ////传入input path
+        //自定义文件输入类
         job2.setInputFormatClass(ParquetInputFormat.class);
         ParquetInputFormat.addInputPath(job2, new Path(inputpath3));
         ParquetInputFormat.addInputPath(job2, new Path(midtemppath1));
@@ -173,20 +179,42 @@ public class ZhktUserBaseRunner {
         //传入output path
         //自定义output
         job2.setOutputFormatClass(MyOutputFormat.class);
-        MyOutputFormat.setOutputPath(job2, new Path(outputpath));
+        MyOutputFormat.setOutputPath(job2, new Path(midtemppath2));
+
+        //job3
+        Job job3 = Job.getInstance(conf,"ztwu2-job-step3");
+        job3.setJarByClass(ZhktUserBaseRunner.class);
+        job3.setMapperClass(GroupCountMapper.class);
+        job3.setReducerClass(GroupCountReducer.class);
+        job3.setMapOutputKeyClass(Text.class);
+        job3.setMapOutputValueClass(LongWritable.class);
+        job3.setMapOutputKeyClass(Text.class);
+        job3.setOutputValueClass(LongWritable.class);
+
+        TextInputFormat.addInputPath(job3,new Path(midtemppath2));
+//        job3.setOutputValueClass(ParquetInputFormat.class);
+//        ParquetOutputFormat.setOutputPath(job3,new Path(outputpath));
+        TextOutputFormat.setOutputPath(job3,new Path(outputpath));
+        //聚合函数操作强制在一个机器节点进行计算
+        job3.setNumReduceTasks(1);
+        job3.setCombinerClass(GroupCountReducer.class);
 
         //受控制的job
         ControlledJob cjob1 = new ControlledJob(conf);
         ControlledJob cjob2 = new ControlledJob(conf);
+        ControlledJob cjob3 = new ControlledJob(conf);
 
         cjob1.setJob(job1);
         cjob2.setJob(job2);
+        cjob3.setJob(job3);
 
         cjob2.addDependingJob(cjob1);
+        cjob3.addDependingJob(cjob2);
 
         JobControl jc = new JobControl("job start");
         jc.addJob(cjob1);
         jc.addJob(cjob2);
+        jc.addJob(cjob3);
 
         Thread jcThread = new Thread(jc);
         jcThread.start();

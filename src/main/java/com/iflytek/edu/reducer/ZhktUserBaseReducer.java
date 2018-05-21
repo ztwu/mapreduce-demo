@@ -43,7 +43,7 @@ public class ZhktUserBaseReducer extends Reducer<MyKeyPair, DwsUcUserOrganizatio
             throws IOException, InterruptedException {
 
        //仅有一个datanode接口去执行reduce任务，任务同步执行
-        tableA.clear();
+       tableA.clear();
        tableB.clear();
        result.clear();
 
