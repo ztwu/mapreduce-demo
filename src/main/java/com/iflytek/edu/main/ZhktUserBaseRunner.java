@@ -191,6 +191,8 @@ public class ZhktUserBaseRunner {
         job3.setMapOutputKeyClass(Text.class);
         job3.setOutputValueClass(LongWritable.class);
 
+        job3.addCacheFile(new URI(cacheFilePath));
+
         TextInputFormat.addInputPath(job3,new Path(midtemppath2));
 //        job3.setOutputValueClass(ParquetInputFormat.class);
 //        ParquetOutputFormat.setOutputPath(job3,new Path(outputpath));

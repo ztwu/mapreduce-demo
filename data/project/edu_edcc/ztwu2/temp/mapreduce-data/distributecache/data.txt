@@ -1,1 +1,3 @@
-distributecache-test
+12,合肥市
+22,安庆市
+32,芜湖市
