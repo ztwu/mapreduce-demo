@@ -35,4 +35,11 @@ public class MySortComparator extends WritableComparator{
         System.out.println("Sort == Comparator中的compare()方法是基于对象的比较 : "+(o2.getUserId().hashCode() - o1.getUserId().hashCode()));
         return o2.getUserId().hashCode() - o1.getUserId().hashCode();
     }
+
+//    @Override
+//    //基于字节排序，不需要序列化和反序列化
+//    public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+//        System.out.println("Sort == Comparator中的compare()方法是基于字节的比较");
+//        return WritableComparator.compareBytes(b1,s1,8, b2,s2,8);
+//    }
 }

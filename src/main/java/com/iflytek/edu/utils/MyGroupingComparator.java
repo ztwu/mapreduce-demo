@@ -32,6 +32,7 @@ public class MyGroupingComparator implements RawComparator<MyKeyPair> {
      *
      * @param l2 表示第二个参与比较的字节数组的偏移量
      */
+    ////基于字节排序，不需要序列化和反序列化
     public int compare(byte[] b1, int s1, int i1, byte[] b2, int s2, int i3) {
         System.out.println("Group == RawComparator中的compare()方法是基于字节的比较");
         return WritableComparator.compareBytes(b1,s1,8, b2,s2,8);
@@ -45,7 +46,4 @@ public class MyGroupingComparator implements RawComparator<MyKeyPair> {
         return o2.getUserId().hashCode() - o1.getUserId().hashCode();
     }
 
-    public boolean equals(Object obj) {
-        return false;
-    }
 }
