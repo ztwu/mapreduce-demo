@@ -66,6 +66,10 @@ public class ZhktUserBaseRunner {
         //获得Configuration配置 Configuration: core-default.xml, core-site.xml
         Configuration conf = new Configuration();
 
+        //远程提交yarn配置
+//        conf.set("mapreduce.framework.name", "yarn");
+//        conf.set("yarn.resourcemanager.address", "localhost:8032");
+
         Util.cleanInputpath(conf, midtemppath1, midtemppath2, outputpath);
 
         String writeSchema = "message example {\n" +
